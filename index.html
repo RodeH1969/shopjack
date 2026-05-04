@@ -647,6 +647,7 @@
     const target = 21;
     const gameNumber = 213;
     const gameDate = '5th May 2026';
+    const shareUrl = 'https://shopjack.onrender.com';
 
     const bustOverlay = document.getElementById('bustOverlay');
     const statusText = document.getElementById('statusText');
@@ -666,7 +667,9 @@
 
     function scoreFor(total) {
       if (total > target) return { score: 0, label: 'BUST!' };
+
       const diff = +(Math.abs(target - total).toFixed(2));
+
       if (diff === 0) return { score: 500, label: 'Exact hit!' };
       if (diff <= 1) return { score: 250, label: 'Within $1' };
       if (diff <= 2) return { score: 100, label: 'Within $2' };
@@ -676,10 +679,10 @@
     }
 
     function resultEmoji(points) {
-      if (points === 500) return '🏆';
-      if (points === 250) return '🍾';
-      if (points === 100) return '💐';
-      if (points === 50) return '👍';
+      if (points >= 500) return '🏆';
+      if (points >= 250) return '🍾';
+      if (points >= 100) return '💐';
+      if (points >= 50) return '👍';
       return '👋';
     }
 
@@ -724,6 +727,10 @@
       lockBtn.addEventListener('click', () => {
         if (scored || !facesVisible) return;
         scored = true;
+
+        if (lockBtnId === 'lockBtn2') {
+          lockBtn.style.display = 'none';
+        }
 
         cards.forEach(card => {
           card.classList.add('show-face', 'price-on', 'scored');
@@ -835,7 +842,7 @@
     function buildShareText() {
       const combinedTotal = +((round1Result?.total || 0) + (round2Result?.total || 0)).toFixed(2);
       const combinedPoints = (round1Result?.score || 0) + (round2Result?.score || 0);
-      const emoji = resultEmoji(combinedPoints >= 500 ? 500 : combinedPoints >= 250 ? 250 : combinedPoints >= 100 ? 100 : combinedPoints >= 50 ? 50 : 10);
+      const emoji = resultEmoji(combinedPoints);
 
       return [
         `ShopJack Game #${gameNumber}`,
@@ -844,7 +851,8 @@
         `Round 1: $${(round1Result?.total || 0).toFixed(2)} / ${round1Result?.score || 0} pts`,
         `Round 2: $${(round2Result?.total || 0).toFixed(2)} / ${round2Result?.score || 0} pts`,
         `Combined total: $${combinedTotal.toFixed(2)}`,
-        `Final points: ${combinedPoints} ${emoji}`
+        `Final points: ${combinedPoints} ${emoji}`,
+        `${shareUrl}`
       ].join('\n');
     }
 
@@ -855,7 +863,8 @@
         try {
           await navigator.share({
             title: `ShopJack Game #${gameNumber}`,
-            text
+            text,
+            url: shareUrl
           });
           return;
         } catch (e) {}
