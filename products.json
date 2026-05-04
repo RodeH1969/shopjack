@@ -1,0 +1,182 @@
+[
+  {
+    "image": "products\\cadburypeppermint180g.jpeg",
+    "name": "Cadbury",
+    "line": "PEPPERMINT",
+    "size": "180g",
+    "price": "$4.00",
+    "special": true,
+    "supermarket": "Woolworths",
+    "out": "cards\\cadbury-card.png"
+  },
+  {
+    "image": "products\\emporiumgoatscheese350g.jpeg",
+    "name": "Emporium",
+    "line": "GOAT'S CHEESE",
+    "size": "350g",
+    "price": "$8.99",
+    "special": false,
+    "supermarket": "Aldi",
+    "out": "cards\\emporiumgoats-card.png"
+  },
+  {
+    "image": "products\\emporiumhalloumi225g.jpeg",
+    "name": "Emporium",
+    "line": "HALLOUMI",
+    "size": "225g",
+    "price": "$4.99",
+    "special": false,
+    "supermarket": "Aldi",
+    "out": "cards\\halloumi-card.png"
+  },
+  {
+    "image": "products\\kellogscocopops535g.jpeg",
+    "name": "Kellogg's",
+    "line": "COCO POPS",
+    "size": "535g",
+    "price": "$7.20",
+    "special": true,
+    "supermarket": "Coles",
+    "out": "cards\\cocopops-card.png"
+  },
+  {
+    "image": "products\\kellogsnutrigrain470g.jpeg",
+    "name": "Kellogg's",
+    "line": "NUTRI-GRAIN",
+    "size": "470g",
+    "price": "$4.50",
+    "special": true,
+    "supermarket": "Woolworths",
+    "out": "cards\\nutrigrain-card.png"
+  },
+  {
+    "image": "products\\morningfreshlemon900ml.jpeg",
+    "name": "Morning Fresh",
+    "line": "LEMON",
+    "size": "900ml",
+    "price": "$10.00",
+    "special": false,
+    "supermarket": "Coles",
+    "out": "cards\\morningfresh-card.png"
+  },
+  {
+    "image": "products\\remanoegglinguine375g.jpeg",
+    "name": "Remano",
+    "line": "EGG LINGUINE",
+    "size": "375g",
+    "price": "$4.49",
+    "special": false,
+    "supermarket": "Aldi",
+    "out": "cards\\linguine-card.png"
+  },
+  {
+    "image": "products\\smithschipschicken170g.jpeg",
+    "name": "Smith's",
+    "line": "CHICKEN CHIPS",
+    "size": "170g",
+    "price": "$2.50",
+    "special": true,
+    "supermarket": "Woolworths",
+    "out": "cards\\smiths-card.png"
+  },
+  {
+    "image": "products\\westacrecottagecheese500g.jpeg",
+    "name": "Westacre",
+    "line": "COTTAGE CHEESE",
+    "size": "500g",
+    "price": "$5.49",
+    "special": false,
+    "supermarket": "Aldi",
+    "out": "cards\\cottagecheese-card.png"
+  },
+  {
+    "image": "products\\westacretastycheese1kg.jpeg",
+    "name": "Westacre",
+    "line": "TASTY CHEESE",
+    "size": "1kg",
+    "price": "$8.99",
+    "special": false,
+    "supermarket": "Aldi",
+    "out": "cards\\tastycheese-card.png"
+  },
+  {
+    "image": "products\\atlasflyspray300g.jpeg",
+    "name": "Atlas",
+    "line": "FLY SPRAY",
+    "size": "300g",
+    "price": "$2.79",
+    "special": false,
+    "supermarket": "Aldi",
+    "out": "cards\\atlasflyspray-card.png"
+  },
+  {
+    "image": "products\\begamacandcheese280g.jpeg",
+    "name": "Bega",
+    "line": "MAC & CHEESE",
+    "size": "280g",
+    "price": "$4.69",
+    "special": false,
+    "supermarket": "Aldi",
+    "out": "cards\\begamacandcheese-card.png"
+  },
+  {
+    "image": "products\\bonappetitbriocheburgebuns200g.jpeg",
+    "name": "Bon Appetit",
+    "line": "BRIOCHE BURGER BUNS",
+    "size": "200g",
+    "price": "$3.49",
+    "special": false,
+    "supermarket": "Aldi",
+    "out": "cards\\briochebuns-card.png"
+  },
+  {
+    "image": "products\\holbrooksworcestshiresauce500ml.jpg",
+    "name": "Holbrooks",
+    "line": "WORCESTERSHIRE SAUCE",
+    "size": "500ml",
+    "price": "$6.00",
+    "special": false,
+    "supermarket": "Woolworths",
+    "out": "cards\\worcestersauce-card.png"
+  },
+  {
+    "image": "products\\internationalcuisinepizzasnacks400g.jpeg",
+    "name": "International Cuisine",
+    "line": "PIZZA SNACKS",
+    "size": "400g",
+    "price": "$5.99",
+    "special": false,
+    "supermarket": "Aldi",
+    "out": "cards\\pizzasnacks-card.png"
+  },
+  {
+    "image": "products\\niveamenblackandwhitedeoderant200ml.jpeg",
+    "name": "Nivea Men",
+    "line": "BLACK & WHITE DEODORANT",
+    "size": "200ml",
+    "price": "$4.99",
+    "special": false,
+    "supermarket": "Aldi",
+    "out": "cards\\niveadeo-card.png"
+  },
+  {
+    "image": "products\\nonshinramyun480g.jpeg",
+    "name": "Nongshim",
+    "line": "SHIN RAMYUN",
+    "size": "480g",
+    "price": "$4.99",
+    "special": false,
+    "supermarket": "Aldi",
+    "out": "cards\\ramyun-card.png"
+  },
+  {
+    "image": "products\\quilton3plytoiletpaper18rolls.jpeg",
+    "name": "Quilton",
+    "line": "3 PLY TOILET PAPER",
+    "size": "18 rolls",
+    "price": "$9.89",
+    "special": false,
+    "supermarket": "Aldi",
+    "out": "cards\\quilton-card.png"
+  }
+]

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ShopJack Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg1:#041021;
+      --bg2:#050913;
+      --accent:#21c674;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Arial,sans-serif;
+      background:radial-gradient(circle at 10% 0%, #11294f 0%, var(--bg1) 40%, var(--bg2) 100%);
+      color:#f4f4f4;
+      padding:16px;
+    }
+    .shell{
+      max-width:720px;
+      margin:0 auto;
+      background:rgba(10,16,32,.94);
+      border-radius:16px;
+      padding:20px 20px 24px;
+      box-shadow:0 18px 40px rgba(0,0,0,.6);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    h1{
+      margin:0 0 12px;
+      font-size:22px;
+    }
+    p{margin:4px 0 10px;font-size:14px;color:#d0d2db}
+    .field-row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    label{
+      font-size:14px;
+      min-width:90px;
+    }
+    input[type="number"]{
+      padding:6px 8px;
+      border-radius:6px;
+      border:1px solid rgba(255,255,255,.15);
+      background:#050913;
+      color:#fff;
+      width:120px;
+    }
+    select{
+      padding:6px 8px;
+      border-radius:6px;
+      border:1px solid rgba(255,255,255,.15);
+      background:#050913;
+      color:#fff;
+      flex:1;
+      min-width:0;
+    }
+    .cards-grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+      margin-top:6px;
+      margin-bottom:10px;
+    }
+    .slot-label{
+      font-size:13px;
+      color:#a9adbd;
+    }
+    button{
+      border:0;
+      border-radius:999px;
+      padding:9px 16px;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+      margin-right:8px;
+      box-shadow:0 10px 20px rgba(0,0,0,.45);
+    }
+    .btn-primary{
+      background:var(--accent);
+      color:#071317;
+    }
+    .btn-secondary{
+      background:#ffffff;
+      color:#06111a;
+    }
+    .small-note{
+      font-size:12px;
+      color:#9aa0b3;
+      margin-top:4px;
+    }
+    textarea{
+      width:100%;
+      min-height:260px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.15);
+      background:#02060b;
+      color:#e7e9f5;
+      padding:10px;
+      font-family:Consolas,monospace;
+      font-size:12px;
+      resize:vertical;
+      margin-top:8px;
+    }
+    code{
+      background:#02060b;
+      padding:2px 4px;
+      border-radius:4px;
+      font-size:12px;
+    }
+    hr{
+      border:none;
+      border-top:1px solid rgba(255,255,255,.12);
+      margin:14px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <h1>ShopJack Admin</h1>
+    <p>Use this to set today&rsquo;s <strong>target</strong> and which <strong>5 cards</strong> you want in the game. Then copy the generated code into de>shopjack-locknload.html</code>.</p>
+
+    <div class="field-row">
+      abel for="targetInput">Target ($)</label>
+      <input type="number" id="targetInput" value="21" min="1" step="0.01">
+    </div>
+
+    <div class="field-row">
+      abel>Cards used</label>
+      <span style="font-size:13px;color:#cfd3e5;">Pick exactly 5 cards below.</span>
+    </div>
+
+    <div class="cards-grid" id="slots">
+      <!-- JS fills 5 selects here -->
+    </div>
+
+    <button class="btn-primary" id="generateBtn" type="button">Generate config</button>
+    <button class="btn-secondary" id="fillDefaultBtn" type="button">Cadbury → Nutri-Grain</button>
+    <div class="small-note">After you click &ldquo;Generate config&rdquo;, copy everything from the box below and paste into your game file&rsquo;s &lt;script&gt; block, replacing the existing de>target</code> and card setup.</div>
+
+    <hr>
+
+    abel for="output" style="font-size:13px;">Config to paste into de>shopjack-locknload.html</code></label>
+    <textarea id="output" readonly></textarea>
+  </div>
+
+  <script>
+    // Full pool of your 18 card PNGs and prices
+    const CARD_POOL = [
+      { id:'cadbury',       image:'./cards/cadbury-card.png',       name:'Cadbury',                price:4.00 },
+      { id:'emporiumgoats', image:'./cards/emporiumgoats-card.png', name:'Emporium Goats',         price:8.99 },
+      { id:'halloumi',      image:'./cards/halloumi-card.png',      name:'Halloumi',               price:4.99 },
+      { id:'cocopops',      image:'./cards/cocopops-card.png',      name:'Coco Pops',              price:7.20 },
+      { id:'nutrigrain',    image:'./cards/nutrigrain-card.png',    name:'Nutri-Grain',            price:4.50 },
+      { id:'morningfresh',  image:'./cards/morningfresh-card.png',  name:'Morning Fresh',          price:10.00 },
+      { id:'linguine',      image:'./cards/linguine-card.png',      name:'Remano Egg Linguine',    price:4.49 },
+      { id:'smiths',        image:'./cards/smiths-card.png',        name:'Smith\'s Chicken Chips', price:2.50 },
+      { id:'cottage',       image:'./cards/cottagecheese-card.png', name:'Westacre Cottage Cheese',price:5.49 },
+      { id:'tasty',         image:'./cards/tastycheese-card.png',   name:'Westacre Tasty Cheese',  price:8.99 },
+      { id:'atlas',         image:'./cards/atlasflyspray-card.png', name:'Atlas Fly Spray',        price:2.79 },
+      { id:'bega',          image:'./cards/begamacandcheese-card.png', name:'Bega Mac & Cheese',  price:4.69 },
+      { id:'brioche',       image:'./cards/briochebuns-card.png',   name:'Brioche Burger Buns',    price:3.49 },
+      { id:'worcester',     image:'./cards/worcestersauce-card.png',name:'Holbrooks Worcestershire',price:6.00 },
+      { id:'pizzasnacks',   image:'./cards/pizzasnacks-card.png',   name:'Pizza Snacks',           price:5.99 },
+      { id:'nivea',         image:'./cards/niveadeo-card.png',      name:'Nivea Black & White Deo',price:4.99 },
+      { id:'ramyun',        image:'./cards/ramyun-card.png',        name:'Shin Ramyun',            price:4.99 },
+      { id:'quilton',       image:'./cards/quilton-card.png',       name:'Quilton 3 Ply 18 Rolls', price:9.89 },
+    ];
+
+    const slotsContainer = document.getElementById('slots');
+    const targetInput = document.getElementById('targetInput');
+    const output = document.getElementById('output');
+    const generateBtn = document.getElementById('generateBtn');
+    const fillDefaultBtn = document.getElementById('fillDefaultBtn');
+
+    const SLOT_COUNT = 5;
+
+    function createSlots() {
+      slotsContainer.innerHTML = "";
+      for (let i = 0; i < SLOT_COUNT; i++) {
+        const row = document.createElement('div');
+        row.className = 'field-row';
+
+        const label = document.createElement('div');
+        label.className = 'slot-label';
+        label.textContent = `Card ${i + 1}`;
+
+        const select = document.createElement('select');
+        select.dataset.slotIndex = i;
+
+        const emptyOpt = document.createElement('option');
+        emptyOpt.value = "";
+        emptyOpt.textContent = "-- choose a card --";
+        select.appendChild(emptyOpt);
+
+        CARD_POOL.forEach(card => {
+          const opt = document.createElement('option');
+          opt.value = card.id;
+          opt.textContent = `${card.name} (${card.price.toFixed(2)})`;
+          select.appendChild(opt);
+        });
+
+        row.appendChild(label);
+        row.appendChild(select);
+        slotsContainer.appendChild(row);
+      }
+    }
+
+    function getSelectedCards() {
+      const ids = [];
+      const selects = slotsContainer.querySelectorAll('select');
+      selects.forEach(sel => {
+        if (sel.value) ids.push(sel.value);
+      });
+      return ids;
+    }
+
+    function buildConfig() {
+      const ids = getSelectedCards();
+      const targetValue = Number(targetInput.value || 0);
+
+      if (ids.length !== SLOT_COUNT) {
+        alert(`Please choose exactly ${SLOT_COUNT} cards (you have ${ids.length}).`);
+        return;
+      }
+      if (!targetValue || targetValue <= 0) {
+        alert("Please enter a valid target amount.");
+        return;
+      }
+
+      const chosenCards = ids.map(id => CARD_POOL.find(c => c.id === id));
+
+      const targetLine = `const target = ${targetValue.toFixed(2)};`;
+      const cardArray = chosenCards.map(c => {
+        return `  { image: "${c.image}", name: "${c.name.replace(/"/g, '\\"')}", price: ${c.price.toFixed(2)} }`;
+      }).join(",\n");
+
+      const snippet = `// === GENERATED BY SHOPJACK ADMIN ===\n${targetLine}\n\nconst cardPool = [\n${cardArray}\n];\nconst maxCardsPerGame = ${SLOT_COUNT};\n// ==================================\n`;
+
+      output.value = snippet;
+    }
+
+    function fillDefault() {
+      const order = ['cadbury','emporiumgoats','halloumi','cocopops','nutrigrain'];
+      const selects = slotsContainer.querySelectorAll('select');
+      selects.forEach((sel, i) => {
+        sel.value = order[i] || "";
+      });
+      targetInput.value = 21;
+    }
+
+    createSlots();
+    fillDefault();
+
+    generateBtn.addEventListener('click', buildConfig);
+    fillDefaultBtn.addEventListener('click', fillDefault);
+  </script>
+</body>
+</html>

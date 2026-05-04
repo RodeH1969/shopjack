@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopJack Locknload</title>
+  <style>
+    :root {
+      --bg1:#07224d;
+      --bg2:#021226;
+      --gold:#ffd978;
+      --red:#d61e24;
+      --green:#34c36b;
+    }
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      min-height:100vh;
+      font-family:Arial,sans-serif;
+      color:#fff;
+      background:radial-gradient(circle at 50% 10%, #0a3773 0%, var(--bg1) 40%, var(--bg2) 100%);
+      overflow-x:hidden;
+    }
+
+    .wrap {
+      width:min(100%,430px);
+      margin:0 auto;
+      min-height:100vh;
+      padding:16px 8px 28px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+      position:relative;
+    }
+
+    .hud {
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      font-weight:900;
+    }
+
+    .target-label { font-size:22px; }
+
+    .chip {
+      width:88px;
+      height:88px;
+      border-radius:50%;
+      background:var(--red);
+      padding:8px;
+      display:grid;
+      place-items:center;
+      box-shadow:0 12px 28px rgba(0,0,0,.35);
+    }
+
+    .chip-inner {
+      width:100%;
+      height:100%;
+      border-radius:50%;
+      background:#fff;
+      color:#111;
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      font-size:29px;
+      border:3px solid rgba(0,0,0,.08);
+    }
+
+    .tableau {
+      width:100%;
+      display:flex;
+      justify-content:center;
+      align-items:flex-end;
+      padding-top:8px;
+      padding-bottom:26px;
+      min-height:260px;
+    }
+
+    .card-wrap {
+      width:22.5vw;
+      max-width:90px;
+      min-width:70px;
+      aspect-ratio:2.5/3.7;
+      position:relative;
+      margin-left:-11px;
+      transition:
+        transform .5s ease,
+        filter .4s ease,
+        opacity .4s ease;
+    }
+    .card-wrap:first-child { margin-left:0; }
+
+    /* After scoring, locked (chosen) cards rise up like poker winners */
+    .card-wrap.locked {
+      transform:translateY(-28px) scale(1.02);
+      z-index:5;
+      filter:drop-shadow(0 16px 18px rgba(0,0,0,.42));
+    }
+
+    /* Non‑locked cards drop slightly after scoring */
+    .card-wrap.scored:not(.locked) {
+      transform:translateY(10px) scale(.98);
+      opacity:.92;
+    }
+
+    .tick {
+      position:absolute;
+      top:-12px;
+      left:50%;
+      transform:translateX(-50%);
+      width:30px;
+      height:30px;
+      border-radius:50%;
+      border:2px solid #fff;
+      background:rgba(4,17,41,.95);
+      color:#fff;
+      font-weight:900;
+      font-size:18px;
+      z-index:9;
+      display:grid;
+      place-items:center;
+      box-shadow:0 5px 14px rgba(0,0,0,.28);
+    }
+
+    .card-wrap.chosen .tick {
+      background:var(--green);
+      color:#03210f;
+      border-color:#c7ffd8;
+    }
+
+    .card {
+      width:100%;
+      height:100%;
+      position:relative;
+      transform-style:preserve-3d;
+      transition:transform .8s cubic-bezier(.2,.8,.2,1);
+      filter:drop-shadow(0 10px 10px rgba(0,0,0,.28));
+    }
+
+    /* Flip between back and front */
+    .show-face .card {
+      transform:rotateY(180deg);
+    }
+
+    .card-face {
+      position:absolute;
+      inset:0;
+      border-radius:14px;
+      overflow:hidden;
+      backface-visibility:hidden;
+      border:2px solid rgba(255,255,255,.85);
+      background:#fff;
+    }
+
+    .card-face.back img,
+    .card-face.front img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .card-face.front {
+      transform:rotateY(180deg);
+      background:#fff;
+    }
+
+    /* Price badge (hidden until Locknload) */
+    .price-badge {
+      position:absolute;
+      left:50%;
+      bottom:10px;
+      transform:translateX(-50%);
+      min-width:64px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(0,0,0,.82);
+      color:#fff;
+      text-align:center;
+      font-weight:900;
+      font-size:20px;
+      z-index:8;
+      opacity:0;
+      pointer-events:none;
+      transition:
+        opacity .35s ease,
+        transform .35s ease;
+      border:2px solid rgba(255,255,255,.88);
+    }
+
+    .price-on .price-badge {
+      opacity:1;
+      transform:translateX(-50%) translateY(-2px);
+    }
+
+    .controls {
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      width:100%;
+      flex-wrap:wrap;
+    }
+
+    .btn {
+      border:0;
+      border-radius:999px;
+      padding:12px 20px;
+      font-weight:900;
+      font-size:17px;
+      box-shadow:0 8px 22px rgba(0,0,0,.28);
+    }
+
+    .btn-primary {
+      background:var(--gold);
+      color:#172033;
+    }
+
+    .btn-secondary {
+      background:#fff;
+      color:#041a3c;
+    }
+
+    .scoreboard {
+      width:100%;
+      background:rgba(255,255,255,.1);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:18px;
+      padding:14px 16px;
+      display:grid;
+      gap:6px;
+      text-align:center;
+    }
+
+    .scoreboard .line1 { font-size:17px; font-weight:800; }
+    .scoreboard .line2 { font-size:28px; font-weight:900; }
+    .scoreboard .line3 { font-size:20px; font-weight:900; color:#ffe08f; }
+    .scoreboard .line4 { font-size:14px; color:rgba(255,255,255,.8); }
+
+    /* BUST overlay */
+    .bust-overlay {
+      position:fixed;
+      inset:0;
+      display:grid;
+      place-items:center;
+      pointer-events:none;
+      opacity:0;
+      background:radial-gradient(circle,
+        rgba(255,45,45,.2) 0%,
+        rgba(0,0,0,.78) 70%);
+    }
+
+    .bust-overlay.show {
+      animation:bustFlash 1.7s ease forwards;
+    }
+
+    .bust-text {
+      font-size:22vw;
+      font-weight:900;
+      color:#fff;
+      letter-spacing:.08em;
+      text-shadow:
+        0 0 10px rgba(255,255,255,.45),
+        0 0 25px rgba(255,0,0,.75),
+        0 0 60px rgba(255,0,0,.9);
+      transform:scale(.2) rotate(-8deg);
+      opacity:0;
+    }
+
+    .bust-overlay.show .bust-text {
+      animation:bustPop 1.5s cubic-bezier(.12,.78,.22,1) forwards;
+    }
+
+    .burst, .burst::before, .burst::after {
+      position:absolute;
+      content:"";
+      width:220px;
+      height:220px;
+      border-radius:50%;
+      border:8px solid rgba(255,60,60,.55);
+    }
+
+    .burst {
+      transform:scale(.2);
+      opacity:0;
+    }
+
+    .bust-overlay.show .burst {
+      animation:ringBoom 1.2s ease-out forwards;
+    }
+
+    .burst::before { inset:-24px; }
+    .burst::after  { inset:24px; }
+
+    @keyframes bustFlash {
+      0%{opacity:0}
+      10%{opacity:1}
+      85%{opacity:1}
+      100%{opacity:0}
+    }
+
+    @keyframes bustPop {
+      0%{transform:scale(.15) rotate(-12deg);opacity:0}
+      18%{transform:scale(1.25) rotate(3deg);opacity:1}
+      32%{transform:scale(.92) rotate(-2deg);opacity:1}
+      48%{transform:scale(1.12) rotate(1deg);opacity:1}
+      100%{transform:scale(1) rotate(0);opacity:1}
+    }
+
+    @keyframes ringBoom {
+      0%{transform:scale(.1);opacity:0}
+      20%{opacity:1}
+      100%{transform:scale(2.2);opacity:0}
+    }
+
+    @media (max-width:360px){
+      .card-wrap{min-width:64px;margin-left:-13px}
+      .target-label{font-size:20px}
+      .chip{width:78px;height:78px}
+      .chip-inner{font-size:25px}
+      .btn{font-size:15px;padding:11px 16px}
+      .scoreboard .line2{font-size:24px}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="hud">
+      <div class="target-label">Target =</div>
+      <div class="chip"><div class="chip-inner">$21</div></div>
+    </div>
+
+    <section class="tableau">
+      <!-- Cadbury -->
+      <div class="card-wrap" data-price="4.00">
+        <button class="tick" type="button">✓</button>
+        <div class="card">
+          <div class="card-face back">
+            <img src="./facecard.jpeg" alt="ShopJack card back">
+          </div>
+          <div class="card-face front">
+            <img src="./cards/cadbury-card.png" alt="Cadbury card">
+          </div>
+        </div>
+        <div class="price-badge">$4.00</div>
+      </div>
+
+      <!-- Emporium goat's cheese -->
+      <div class="card-wrap" data-price="8.99">
+        <button class="tick" type="button">✓</button>
+        <div class="card">
+          <div class="card-face back">
+            <img src="./facecard.jpeg" alt="ShopJack card back">
+          </div>
+          <div class="card-face front">
+            <img src="./cards/emporiumgoats-card.png" alt="Emporium goat's cheese card">
+          </div>
+        </div>
+        <div class="price-badge">$8.99</div>
+      </div>
+
+      <!-- Emporium halloumi -->
+      <div class="card-wrap" data-price="4.99">
+        <button class="tick" type="button">✓</button>
+        <div class="card">
+          <div class="card-face back">
+            <img src="./facecard.jpeg" alt="ShopJack card back">
+          </div>
+          <div class="card-face front">
+            <img src="./cards/halloumi-card.png" alt="Halloumi card">
+          </div>
+        </div>
+        <div class="price-badge">$4.99</div>
+      </div>
+
+      <!-- Coco Pops -->
+      <div class="card-wrap" data-price="7.20">
+        <button class="tick" type="button">✓</button>
+        <div class="card">
+          <div class="card-face back">
+            <img src="./facecard.jpeg" alt="ShopJack card back">
+          </div>
+          <div class="card-face front">
+            <img src="./cards/cocopops-card.png" alt="Coco Pops card">
+          </div>
+        </div>
+        <div class="price-badge">$7.20</div>
+      </div>
+
+      <!-- Nutri-Grain -->
+      <div class="card-wrap" data-price="4.50">
+        <button class="tick" type="button">✓</button>
+        <div class="card">
+          <div class="card-face back">
+            <img src="./facecard.jpeg" alt="ShopJack card back">
+          </div>
+          <div class="card-face front">
+            <img src="./cards/nutrigrain-card.png" alt="Nutri-Grain card">
+          </div>
+        </div>
+        <div class="price-badge">$4.50</div>
+      </div>
+    </section>
+
+    <div class="controls">
+      <button class="btn btn-secondary" id="flipBtn" type="button">Flip</button>
+      <button class="btn btn-primary" id="lockBtn" type="button">Locknload</button>
+      <button class="btn btn-secondary" id="resetBtn" type="button">Reset</button>
+    </div>
+
+    <section class="scoreboard" aria-live="polite">
+      <div class="line1" id="statusText">
+        Flip to show cards, tick your picks, then Locknload.
+      </div>
+      <div class="line2" id="totalText">Locked total: $0.00</div>
+      <div class="line3" id="scoreText">Score: 0 points</div>
+      <div class="line4">Prices stay hidden until Locknload.</div>
+    </section>
+  </main>
+
+  <div class="bust-overlay" id="bustOverlay">
+    <div class="burst"></div>
+    <div class="bust-text">BUST</div>
+  </div>
+
+  <script>
+    const target = 21; // change this to 50, 30, etc when needed
+
+    const cards = [...document.querySelectorAll('.card-wrap')];
+    const flipBtn = document.getElementById('flipBtn');
+    const lockBtn = document.getElementById('lockBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const statusText = document.getElementById('statusText');
+    const totalText = document.getElementById('totalText');
+    const scoreText = document.getElementById('scoreText');
+    const bustOverlay = document.getElementById('bustOverlay');
+
+    let facesVisible = false;
+    let scored = false;
+
+    // Tick selection – only when faces are visible and before scoring
+    cards.forEach(card => {
+      card.querySelector('.tick').addEventListener('click', () => {
+        if (!facesVisible || scored) return;
+        card.classList.toggle('chosen');
+      });
+    });
+
+    // Flip: show faces / backs, no prices
+    flipBtn.addEventListener('click', () => {
+      if (scored) return;
+      facesVisible = !facesVisible;
+      cards.forEach(card => card.classList.toggle('show-face', facesVisible));
+      flipBtn.textContent = facesVisible ? 'Show Back' : 'Flip';
+      statusText.textContent = facesVisible
+        ? 'Now tick the cards you want to keep in.'
+        : 'Flip to show cards, tick your picks, then Locknload.';
+    });
+
+    function scoreFor(total) {
+      if (total > target) return { score: 0, label: 'BUST!' };
+      const diff = +(Math.abs(target - total).toFixed(2));
+      if (diff === 0) return { score: 500, label: 'Exact hit!' };
+      if (diff <= 2)  return { score: 100, label: 'Within $2' };
+      if (diff <= 5)  return { score: 50,  label: 'Within $5' };
+      if (diff <= 10) return { score: 10,  label: 'Within $10' };
+      return { score: 0, label: '0 points' };
+    }
+
+    function triggerBust() {
+      bustOverlay.classList.remove('show');
+      void bustOverlay.offsetWidth; // force reflow
+      bustOverlay.classList.add('show');
+    }
+
+    // Locknload: reveal prices, elevate chosen cards, compute score
+    lockBtn.addEventListener('click', () => {
+      if (scored) return;
+      scored = true;
+
+      cards.forEach(card => {
+        card.classList.add('show-face', 'price-on', 'scored');
+        if (card.classList.contains('chosen')) {
+          card.classList.add('locked');
+        }
+      });
+
+      let total = 0;
+      let selectedCount = 0;
+      cards.forEach(card => {
+        if (card.classList.contains('chosen')) {
+          total += Number(card.dataset.price);
+          selectedCount += 1;
+        }
+      });
+
+      total = +total.toFixed(2);
+      const result = scoreFor(total);
+
+      totalText.textContent = `Locked total: $${total.toFixed(2)}`;
+      scoreText.textContent = `Score: ${result.score} points`;
+
+      if (selectedCount === 0) {
+        statusText.textContent = 'No cards ticked. 0 points.';
+        return;
+      }
+
+      if (total > target) {
+        statusText.textContent = 'BUST! Locked cards went over $21.';
+        triggerBust();
+        return;
+      }
+
+      statusText.textContent =
+        `${result.label} with ${selectedCount} locked card` +
+        (selectedCount === 1 ? '' : 's') + '.';
+    });
+
+    // Reset game
+    resetBtn.addEventListener('click', () => {
+      facesVisible = false;
+      scored = false;
+      cards.forEach(card =>
+        card.classList.remove(
+          'chosen','show-face','price-on','scored','locked'
+        )
+      );
+      flipBtn.textContent = 'Flip';
+      statusText.textContent =
+        'Flip to show cards, tick your picks, then Locknload.';
+      totalText.textContent = 'Locked total: $0.00';
+      scoreText.textContent = 'Score: 0 points';
+      bustOverlay.classList.remove('show');
+    });
+  </script>
+</body>
+</html>
