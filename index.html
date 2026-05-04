@@ -124,7 +124,7 @@
     .tableau {
       width:100%;
       display:grid;
-      grid-template-columns:repeat(6, 1fr);
+      grid-template-columns:repeat(3, 1fr);
       gap:12px 10px;
       align-items:end;
       justify-items:center;
@@ -143,11 +143,14 @@
       z-index:2;
     }
 
-    .card-wrap.pos1 { grid-column:1 / span 2; }
-    .card-wrap.pos2 { grid-column:3 / span 2; }
-    .card-wrap.pos3 { grid-column:5 / span 2; }
-    .card-wrap.pos4 { grid-column:2 / span 2; }
-    .card-wrap.pos5 { grid-column:4 / span 2; }
+    .card-wrap.pos1,
+    .card-wrap.pos2,
+    .card-wrap.pos3,
+    .card-wrap.pos4,
+    .card-wrap.pos5,
+    .card-wrap.pos6 {
+      grid-column:auto;
+    }
 
     .card-wrap.locked {
       transform:translateY(-22px) scale(1.03);
@@ -546,6 +549,15 @@
           </div>
           <div class="price-badge">$4.50</div>
         </div>
+
+        <div class="card-wrap pos6" data-price="10.00">
+          <button class="tick" type="button">✓</button>
+          <div class="card">
+            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
+            <div class="card-face front"><img src="cards/morningfresh-card.png" alt="Morning Fresh Lemon"></div>
+          </div>
+          <div class="price-badge">$10.00</div>
+        </div>
       </section>
 
       <div class="controls">
@@ -556,7 +568,7 @@
 
     <section class="round-panel" id="round2Panel">
       <div class="round-title">Last Chance Saloon</div>
-      <div class="round-sub">Different 5 cards. One last run at the target.</div>
+      <div class="round-sub">Different 6 cards. One last run at the target.</div>
 
       <section class="tableau" id="round2Tableau">
         <div class="card-wrap pos1" data-price="2.50">
@@ -602,6 +614,15 @@
             <div class="card-face front"><img src="cards/quilton-card.png" alt="Quilton Toilet Paper"></div>
           </div>
           <div class="price-badge">$9.89</div>
+        </div>
+
+        <div class="card-wrap pos6" data-price="3.49">
+          <button class="tick" type="button">✓</button>
+          <div class="card">
+            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
+            <div class="card-face front"><img src="cards/brioche-card.png" alt="Bon Appetit Brioche Burger Buns"></div>
+          </div>
+          <div class="price-badge">$3.49</div>
         </div>
       </section>
 
@@ -833,7 +854,7 @@
       statusText.textContent = 'Welcome to Last Chance Saloon. Flip the new cards.';
       totalText.textContent = `Round 1 total: $${(round1Result?.total || 0).toFixed(2)}`;
       scoreText.textContent = `Round 1 score: ${round1Result?.score || 0} points`;
-      hintText.textContent = 'Round 2 uses a different 5-card set.';
+      hintText.textContent = 'Round 2 uses a different 6-card set.';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
