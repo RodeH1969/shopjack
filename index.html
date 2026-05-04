@@ -35,6 +35,7 @@
       align-items:center;
       gap:14px;
       position:relative;
+      z-index:1;
     }
 
     .game-meta {
@@ -102,6 +103,8 @@
       justify-items:center;
       padding-top:6px;
       padding-bottom:8px;
+      position:relative;
+      z-index:2;
     }
 
     .card-wrap {
@@ -110,6 +113,7 @@
       aspect-ratio:2.5/3.7;
       position:relative;
       transition:transform .5s ease, filter .4s ease, opacity .4s ease;
+      z-index:2;
     }
 
     .card-wrap.pos1 { grid-column:1 / span 2; }
@@ -253,6 +257,12 @@
       color:#041a3c;
     }
 
+    .btn-share {
+      background:#e9f3ff;
+      color:#062a54;
+      display:none;
+    }
+
     .scoreboard {
       width:100%;
       background:rgba(255,255,255,.1);
@@ -276,24 +286,34 @@
       place-items:center;
       pointer-events:none;
       opacity:0;
-      background:radial-gradient(circle, rgba(255,45,45,.2) 0%, rgba(0,0,0,.78) 70%);
+      z-index:99999;
+      background:radial-gradient(circle, rgba(255,45,45,.18) 0%, rgba(0,0,0,.08) 40%, rgba(0,0,0,0) 72%);
     }
 
     .bust-overlay.show {
       animation:bustFlash 1.7s ease forwards;
     }
 
+    .bust-center {
+      transform:translateY(-60px);
+      display:grid;
+      place-items:center;
+      position:relative;
+    }
+
     .bust-text {
-      font-size:22vw;
+      font-size:24vw;
       font-weight:900;
       color:#fff;
       letter-spacing:.08em;
       text-shadow:
-        0 0 10px rgba(255,255,255,.45),
-        0 0 25px rgba(255,0,0,.75),
-        0 0 60px rgba(255,0,0,.9);
+        0 0 10px rgba(255,255,255,.55),
+        0 0 25px rgba(255,0,0,.85),
+        0 0 60px rgba(255,0,0,.95);
       transform:scale(.2) rotate(-8deg);
       opacity:0;
+      position:relative;
+      z-index:2;
     }
 
     .bust-overlay.show .bust-text {
@@ -312,6 +332,7 @@
     .burst {
       transform:scale(.2);
       opacity:0;
+      z-index:1;
     }
 
     .bust-overlay.show .burst {
@@ -351,6 +372,7 @@
       .chip-inner { font-size:25px; }
       .btn { font-size:15px; padding:10px 14px; }
       .scoreboard .line2 { font-size:23px; }
+      .bust-center { transform:translateY(-42px); }
     }
   </style>
 </head>
@@ -437,36 +459,45 @@
       <button class="btn btn-secondary" id="flipBtn" type="button">Flip cards</button>
       <button class="btn btn-primary" id="lockBtn" type="button">Locknload</button>
       <button class="btn btn-secondary" id="resetBtn" type="button">1 do over</button>
+      <button class="btn btn-share" id="shareBtn" type="button">Share</button>
     </div>
 
     <section class="scoreboard" aria-live="polite">
       <div class="line1" id="statusText">Flip the cards, tick your picks, then Locknload.</div>
       <div class="line2" id="totalText">Locked total: $0.00</div>
       <div class="line3" id="scoreText">Score: 0 points</div>
-      <div class="line4">Your 1 do over disappears after you use it.</div>
+      <div class="line4" id="shareHint">Share appears after you finish, or after your 1 do over is gone.</div>
     </section>
   </main>
 
   <div class="bust-overlay" id="bustOverlay">
-    <div class="burst"></div>
-    <div class="bust-text">BUST</div>
+    <div class="bust-center">
+      <div class="burst"></div>
+      <div class="bust-text">BUST</div>
+    </div>
   </div>
 
   <script>
     const target = 21;
+    const gameNumber = 213;
+    const gameDate = '5th May 2026';
 
     const cards = [...document.querySelectorAll('.card-wrap')];
     const flipBtn = document.getElementById('flipBtn');
     const lockBtn = document.getElementById('lockBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const shareBtn = document.getElementById('shareBtn');
     const statusText = document.getElementById('statusText');
     const totalText = document.getElementById('totalText');
     const scoreText = document.getElementById('scoreText');
+    const shareHint = document.getElementById('shareHint');
     const bustOverlay = document.getElementById('bustOverlay');
 
     let facesVisible = false;
     let scored = false;
     let doOverUsed = false;
+    let lastTotal = 0;
+    let lastPoints = 0;
 
     cards.forEach(card => {
       card.querySelector('.tick').addEventListener('click', () => {
@@ -474,6 +505,56 @@
         card.classList.toggle('chosen');
       });
     });
+
+    function showShareButton() {
+      shareBtn.style.display = 'inline-block';
+      shareHint.textContent = 'Share your result.';
+    }
+
+    function resultEmoji(points) {
+      if (points === 500) return '🏆';
+      if (points === 100) return '🍾';
+      if (points === 50) return '💐';
+      if (points === 10) return '👍';
+      return '👋';
+    }
+
+    function buildShareText() {
+      const emoji = resultEmoji(lastPoints);
+      return [
+        `ShopJack Game #${gameNumber}`,
+        `${gameDate}`,
+        `Target: $${target}`,
+        `My total: $${lastTotal.toFixed(2)}`,
+        `Points: ${lastPoints} ${emoji}`
+      ].join('\n');
+    }
+
+    async function shareResult() {
+      const text = buildShareText();
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `ShopJack Game #${gameNumber}`,
+            text
+          });
+          return;
+        } catch (err) {}
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        shareBtn.textContent = 'Copied!';
+        setTimeout(() => {
+          shareBtn.textContent = 'Share';
+        }, 1400);
+      } catch (err) {
+        alert(text);
+      }
+    }
+
+    shareBtn.addEventListener('click', shareResult);
 
     flipBtn.addEventListener('click', () => {
       if (scored || facesVisible) return;
@@ -521,24 +602,29 @@
 
       total = +total.toFixed(2);
       const result = scoreFor(total);
+      lastTotal = total;
+      lastPoints = result.score;
 
       totalText.textContent = `Locked total: $${total.toFixed(2)}`;
       scoreText.textContent = `Score: ${result.score} points`;
 
       if (selectedCount === 0) {
         statusText.textContent = 'No cards ticked. 0 points.';
-        return;
-      }
-
-      if (total > target) {
+      } else if (total > target) {
         statusText.textContent = `BUST! Locked cards went over $${target}.`;
         triggerBust();
-        return;
+      } else {
+        statusText.textContent =
+          `${result.label} with ${selectedCount} locked card` +
+          (selectedCount === 1 ? '' : 's') + '.';
       }
 
-      statusText.textContent =
-        `${result.label} with ${selectedCount} locked card` +
-        (selectedCount === 1 ? '' : 's') + '.';
+      if (doOverUsed) {
+        showShareButton();
+      } else {
+        shareHint.textContent = 'Use your 1 do over, or share this result now if you are done.';
+        shareBtn.style.display = 'inline-block';
+      }
     });
 
     resetBtn.addEventListener('click', () => {
@@ -547,6 +633,8 @@
 
       facesVisible = false;
       scored = false;
+      lastTotal = 0;
+      lastPoints = 0;
 
       cards.forEach(card =>
         card.classList.remove('chosen', 'show-face', 'price-on', 'scored', 'locked')
@@ -555,10 +643,12 @@
       totalText.textContent = 'Locked total: $0.00';
       scoreText.textContent = 'Score: 0 points';
       statusText.textContent = 'Do over used. Flip the cards again, then pick your locks.';
+      shareHint.textContent = 'Your do over is gone. Share will appear after this round.';
       bustOverlay.classList.remove('show');
 
       flipBtn.style.display = 'inline-block';
       resetBtn.style.display = 'none';
+      shareBtn.style.display = 'none';
     });
   </script>
 </body>
