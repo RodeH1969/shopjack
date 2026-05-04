@@ -304,6 +304,7 @@
       font-weight:900;
       font-size:17px;
       text-align:left;
+      margin-top:2px;
     }
 
     .btn-saloon img {
@@ -610,6 +611,13 @@
       </div>
     </section>
 
+    <section class="scoreboard" aria-live="polite">
+      <div class="line1" id="statusText">Flip the cards, tick your picks, then Locknload.</div>
+      <div class="line2" id="totalText">Round 1 total: $0.00</div>
+      <div class="line3" id="scoreText">Round 1 score: 0 points</div>
+      <div class="line4" id="hintText">Over the target by even 1 cent is a BUST.</div>
+    </section>
+
     <button class="btn-saloon" id="saloonBtn" type="button">
       <img src="saloon.jpg" alt="Saloon entrance">
       <span class="saloon-text">
@@ -617,13 +625,6 @@
         <span class="saloon-sub">Take your second shot</span>
       </span>
     </button>
-
-    <section class="scoreboard" aria-live="polite">
-      <div class="line1" id="statusText">Flip the cards, tick your picks, then Locknload.</div>
-      <div class="line2" id="totalText">Round 1 total: $0.00</div>
-      <div class="line3" id="scoreText">Round 1 score: 0 points</div>
-      <div class="line4" id="hintText">Over the target by even 1 cent is a BUST.</div>
-    </section>
 
     <section class="summary-box" id="summaryBox">
       <div class="summary-title">Final combined result</div>
@@ -727,10 +728,7 @@
       lockBtn.addEventListener('click', () => {
         if (scored || !facesVisible) return;
         scored = true;
-
-        if (lockBtnId === 'lockBtn2') {
-          lockBtn.style.display = 'none';
-        }
+        lockBtn.style.display = 'none';
 
         cards.forEach(card => {
           card.classList.add('show-face', 'price-on', 'scored');
