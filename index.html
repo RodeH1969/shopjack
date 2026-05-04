@@ -37,6 +37,25 @@
       position:relative;
     }
 
+    .game-meta {
+      width:100%;
+      text-align:center;
+      line-height:1.15;
+    }
+
+    .game-no {
+      font-size:13px;
+      font-weight:800;
+      color:rgba(255,255,255,.88);
+    }
+
+    .game-date {
+      font-size:13px;
+      font-weight:700;
+      color:rgba(255,255,255,.74);
+      margin-top:3px;
+    }
+
     .hud {
       width:100%;
       display:flex;
@@ -324,47 +343,26 @@
     }
 
     @media (max-width:360px) {
-      .wrap {
-        padding-left:8px;
-        padding-right:8px;
-      }
-
-      .tableau {
-        gap:10px 8px;
-      }
-
-      .card-wrap {
-        max-width:88px;
-      }
-
-      .target-label {
-        font-size:20px;
-      }
-
-      .chip {
-        width:76px;
-        height:76px;
-      }
-
-      .chip-inner {
-        font-size:25px;
-      }
-
-      .btn {
-        font-size:15px;
-        padding:10px 14px;
-      }
-
-      .scoreboard .line2 {
-        font-size:23px;
-      }
+      .wrap { padding-left:8px; padding-right:8px; }
+      .tableau { gap:10px 8px; }
+      .card-wrap { max-width:88px; }
+      .target-label { font-size:20px; }
+      .chip { width:76px; height:76px; }
+      .chip-inner { font-size:25px; }
+      .btn { font-size:15px; padding:10px 14px; }
+      .scoreboard .line2 { font-size:23px; }
     }
   </style>
 </head>
 <body>
   <main class="wrap">
+    <div class="game-meta">
+      <div class="game-no">Game #213</div>
+      <div class="game-date">5th May 2026</div>
+    </div>
+
     <div class="hud">
-      <div class="target-label">Target =</div>
+      <div class="target-label">Today's Target =</div>
       <div class="chip"><div class="chip-inner">$21</div></div>
     </div>
 
@@ -436,16 +434,16 @@
     </section>
 
     <div class="controls">
-      <button class="btn btn-secondary" id="flipBtn" type="button">Flip</button>
+      <button class="btn btn-secondary" id="flipBtn" type="button">Flip cards</button>
       <button class="btn btn-primary" id="lockBtn" type="button">Locknload</button>
-      <button class="btn btn-secondary" id="resetBtn" type="button">Reset</button>
+      <button class="btn btn-secondary" id="resetBtn" type="button">1 do over</button>
     </div>
 
     <section class="scoreboard" aria-live="polite">
-      <div class="line1" id="statusText">Flip to show cards, tick your picks, then Locknload.</div>
+      <div class="line1" id="statusText">Flip the cards, tick your picks, then Locknload.</div>
       <div class="line2" id="totalText">Locked total: $0.00</div>
       <div class="line3" id="scoreText">Score: 0 points</div>
-      <div class="line4">Prices stay hidden until Locknload.</div>
+      <div class="line4">Your 1 do over disappears after you use it.</div>
     </section>
   </main>
 
@@ -468,6 +466,7 @@
 
     let facesVisible = false;
     let scored = false;
+    let doOverUsed = false;
 
     cards.forEach(card => {
       card.querySelector('.tick').addEventListener('click', () => {
@@ -477,13 +476,11 @@
     });
 
     flipBtn.addEventListener('click', () => {
-      if (scored) return;
-      facesVisible = !facesVisible;
-      cards.forEach(card => card.classList.toggle('show-face', facesVisible));
-      flipBtn.textContent = facesVisible ? 'Show Back' : 'Flip';
-      statusText.textContent = facesVisible
-        ? 'Now tick the cards you want to keep in.'
-        : 'Flip to show cards, tick your picks, then Locknload.';
+      if (scored || facesVisible) return;
+      facesVisible = true;
+      cards.forEach(card => card.classList.add('show-face'));
+      flipBtn.style.display = 'none';
+      statusText.textContent = 'Now tick the cards you want to keep in.';
     });
 
     function scoreFor(total) {
@@ -503,7 +500,7 @@
     }
 
     lockBtn.addEventListener('click', () => {
-      if (scored) return;
+      if (scored || !facesVisible) return;
       scored = true;
 
       cards.forEach(card => {
@@ -545,16 +542,23 @@
     });
 
     resetBtn.addEventListener('click', () => {
+      if (doOverUsed) return;
+      doOverUsed = true;
+
       facesVisible = false;
       scored = false;
+
       cards.forEach(card =>
         card.classList.remove('chosen', 'show-face', 'price-on', 'scored', 'locked')
       );
-      flipBtn.textContent = 'Flip';
-      statusText.textContent = 'Flip to show cards, tick your picks, then Locknload.';
+
       totalText.textContent = 'Locked total: $0.00';
       scoreText.textContent = 'Score: 0 points';
+      statusText.textContent = 'Do over used. Flip the cards again, then pick your locks.';
       bustOverlay.classList.remove('show');
+
+      flipBtn.style.display = 'inline-block';
+      resetBtn.style.display = 'none';
     });
   </script>
 </body>
