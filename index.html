@@ -3,18 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ShopJack Locknload</title>
+  <title>Super21 Locknload</title>
   <link rel="icon" href="saloonfavi.png" type="image/png">
-<meta property="og:image" content="https://shopjack.onrender.com/saloonfavi.png">
+  <meta property="og:image" content="https://shopjack.onrender.com/saloonfavi.png">
   <style>
     :root {
       --bg1:#07224d;
       --bg2:#021226;
       --gold:#ffd978;
       --red:#d61e24;
-      --green:#34c36b;
       --cream:#fff8ea;
-      --brown:#4f2c14;
+      --slotBorder:rgba(255,255,255,.18);
     }
 
     * { box-sizing:border-box; }
@@ -122,72 +121,91 @@
       display:flex;
     }
 
-    .tableau {
+    .arena {
+      width:100%;
+      position:relative;
+      display:grid;
+      gap:12px;
+      justify-items:center;
+      padding:8px 0 10px;
+    }
+
+    .flip-row {
       width:100%;
       display:grid;
-      grid-template-columns:repeat(3, 1fr);
-      gap:12px 10px;
-      align-items:end;
+      grid-template-columns:repeat(4, 1fr);
+      gap:10px;
       justify-items:center;
-      padding-top:6px;
-      padding-bottom:8px;
+    }
+
+    .flip-slot {
+      width:100%;
+      max-width:92px;
+      aspect-ratio:2.5/3.7;
+      border-radius:14px;
+      border:1px dashed var(--slotBorder);
+      background:rgba(4,17,41,.6);
       position:relative;
-      z-index:2;
+      overflow:visible;
+    }
+
+    .flip-slot.filled {
+      border-color:transparent;
+      background:transparent;
+    }
+
+    .deck-zone {
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:126px;
+      position:relative;
+    }
+
+    .deck-stack {
+      width:92px;
+      aspect-ratio:2.5/3.7;
+      position:relative;
+      filter:drop-shadow(0 10px 16px rgba(0,0,0,.28));
+    }
+
+    .deck-shadow,
+    .deck-shadow-2,
+    .deck-shadow-3 {
+      position:absolute;
+      inset:0;
+      border-radius:14px;
+      background:rgba(255,255,255,.12);
+      border:2px solid rgba(255,255,255,.18);
+    }
+
+    .deck-shadow { transform:translate(0,0); }
+    .deck-shadow-2 { transform:translate(4px,4px); }
+    .deck-shadow-3 { transform:translate(8px,8px); }
+
+    .deck-top {
+      position:absolute;
+      inset:0;
+      border-radius:14px;
+      overflow:hidden;
+      border:2px solid rgba(255,255,255,.9);
+      background:#fff;
+      z-index:4;
+    }
+
+    .deck-top img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
     }
 
     .card-wrap {
       width:100%;
-      max-width:96px;
-      aspect-ratio:2.5/3.7;
+      height:100%;
       position:relative;
-      transition:transform .5s ease, opacity .4s ease;
-      z-index:2;
-    }
-
-    .card-wrap.pos1,
-    .card-wrap.pos2,
-    .card-wrap.pos3,
-    .card-wrap.pos4,
-    .card-wrap.pos5,
-    .card-wrap.pos6 {
-      grid-column:auto;
-    }
-
-    .card-wrap.locked {
-      transform:translateY(-22px) scale(1.03);
-      z-index:5;
-    }
-
-    .card-wrap.scored:not(.locked) {
-      transform:translateY(10px) scale(.98);
-      opacity:.92;
-    }
-
-    .tick {
-      position:absolute;
-      top:-12px;
-      left:50%;
-      transform:translateX(-50%);
-      width:28px;
-      height:28px;
-      border-radius:50%;
-      border:2px solid #fff;
-      background:rgba(4,17,41,.95);
-      color:#fff;
-      font-weight:900;
-      font-size:16px;
-      z-index:9;
-      display:grid;
-      place-items:center;
-      box-shadow:0 5px 14px rgba(0,0,0,.28);
-      cursor:pointer;
-      padding:0;
-    }
-
-    .card-wrap.chosen .tick {
-      background:var(--green);
-      color:#03210f;
-      border-color:#c7ffd8;
+      transition:transform .35s ease, opacity .35s ease;
     }
 
     .card {
@@ -209,20 +227,28 @@
     }
 
     .card-face.back {
-      opacity:1;
-      z-index:2;
-    }
-
-    .card-face.front {
       opacity:0;
       z-index:1;
     }
 
-    .show-face .card-face.back {
+    .card-face.front {
+      opacity:1;
+      z-index:2;
+    }
+
+    .price-hidden .card-face.back {
       opacity:0;
     }
 
-    .show-face .card-face.front {
+    .price-hidden .card-face.front {
+      opacity:1;
+    }
+
+    .price-revealed .card-face.back {
+      opacity:0;
+    }
+
+    .price-revealed .card-face.front {
       opacity:1;
     }
 
@@ -255,7 +281,7 @@
       line-height:1;
     }
 
-    .price-on .price-badge {
+    .price-revealed .price-badge {
       opacity:1;
       transform:translateX(-50%) translateY(-1px);
     }
@@ -276,6 +302,11 @@
       font-size:16px;
       box-shadow:0 8px 22px rgba(0,0,0,.28);
       cursor:pointer;
+    }
+
+    .btn:disabled {
+      opacity:.45;
+      cursor:default;
     }
 
     .btn-primary {
@@ -309,6 +340,8 @@
       font-size:17px;
       text-align:left;
       margin-top:2px;
+      border:0;
+      cursor:pointer;
     }
 
     .btn-saloon img {
@@ -477,8 +510,9 @@
 
     @media (max-width:360px) {
       .wrap { padding-left:8px; padding-right:8px; }
-      .tableau { gap:10px 8px; }
-      .card-wrap { max-width:88px; }
+      .flip-row { gap:8px; }
+      .flip-slot { max-width:84px; }
+      .deck-stack { width:84px; }
       .target-label { font-size:20px; }
       .chip { width:76px; height:76px; }
       .chip-inner { font-size:25px; }
@@ -498,146 +532,88 @@
 
     <div class="hud">
       <div class="target-label">Today's Target =</div>
-      <div class="chip"><div class="chip-inner">$21</div></div>
+      <div class="chip"><div class="chip-inner" id="targetChip">$31</div></div>
     </div>
 
     <section class="round-panel active" id="round1Panel">
       <div class="round-title">Round 1</div>
-      <div class="round-sub">Beat the dealer, then head to the saloon for one last shot.</div>
+      <div class="round-sub">Flip one at a time, then Locknload whenever you like.</div>
 
-      <section class="tableau" id="round1Tableau">
-        <div class="card-wrap pos1" data-price="4.00">
-          <button class="tick" type="button">✓</button>
-          <div class="card">
-            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
-            <div class="card-face front"><img src="cards/cadbury-card.png" alt="Cadbury card"></div>
-          </div>
-          <div class="price-badge">$4.00</div>
+      <section class="arena">
+        <div class="flip-row" id="round1TopRow">
+          <div class="flip-slot" data-slot="0"></div>
+          <div class="flip-slot" data-slot="1"></div>
+          <div class="flip-slot" data-slot="2"></div>
+          <div class="flip-slot" data-slot="3"></div>
         </div>
 
-        <div class="card-wrap pos2" data-price="8.99">
-          <button class="tick" type="button">✓</button>
-          <div class="card">
-            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
-            <div class="card-face front"><img src="cards/emporiumgoats-card.png" alt="Emporium goat's cheese card"></div>
+        <div class="deck-zone">
+          <div class="deck-stack" id="round1Deck">
+            <div class="deck-shadow-3"></div>
+            <div class="deck-shadow-2"></div>
+            <div class="deck-shadow"></div>
+            <div class="deck-top">
+              <img src="facecard.jpeg" alt="Super21 face card">
+            </div>
           </div>
-          <div class="price-badge">$8.99</div>
         </div>
 
-        <div class="card-wrap pos3" data-price="4.99">
-          <button class="tick" type="button">✓</button>
-          <div class="card">
-            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
-            <div class="card-face front"><img src="cards/halloumi-card.png" alt="Halloumi card"></div>
-          </div>
-          <div class="price-badge">$4.99</div>
-        </div>
-
-        <div class="card-wrap pos4" data-price="7.20">
-          <button class="tick" type="button">✓</button>
-          <div class="card">
-            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
-            <div class="card-face front"><img src="cards/cocopops-card.png" alt="Coco Pops card"></div>
-          </div>
-          <div class="price-badge">$7.20</div>
-        </div>
-
-        <div class="card-wrap pos5" data-price="4.50">
-          <button class="tick" type="button">✓</button>
-          <div class="card">
-            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
-            <div class="card-face front"><img src="cards/nutrigrain-card.png" alt="Nutri-Grain card"></div>
-          </div>
-          <div class="price-badge">$4.50</div>
-        </div>
-
-        <div class="card-wrap pos6" data-price="10.00">
-          <button class="tick" type="button">✓</button>
-          <div class="card">
-            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
-            <div class="card-face front"><img src="cards/morningfresh-card.png" alt="Morning Fresh Lemon"></div>
-          </div>
-          <div class="price-badge">$10.00</div>
+        <div class="flip-row" id="round1BottomRow">
+          <div class="flip-slot" data-slot="4"></div>
+          <div class="flip-slot" data-slot="5"></div>
+          <div class="flip-slot" data-slot="6"></div>
+          <div class="flip-slot" data-slot="7"></div>
         </div>
       </section>
 
       <div class="controls">
-        <button class="btn btn-secondary" id="flipBtn1" type="button">Flip cards</button>
+        <button class="btn btn-secondary" id="flipBtn1" type="button">Flip</button>
         <button class="btn btn-primary" id="lockBtn1" type="button">Locknload</button>
       </div>
     </section>
 
     <section class="round-panel" id="round2Panel">
       <div class="round-title">Last Chance Saloon</div>
-      <div class="round-sub">Different 6 cards. One last run at the target.</div>
+      <div class="round-sub">A fresh deck. Same target. One last run.</div>
 
-      <section class="tableau" id="round2Tableau">
-        <div class="card-wrap pos1" data-price="2.50">
-          <button class="tick" type="button">✓</button>
-          <div class="card">
-            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
-            <div class="card-face front"><img src="cards/smiths-card.png" alt="Smith's Chicken Chips"></div>
-          </div>
-          <div class="price-badge">$2.50</div>
+      <section class="arena">
+        <div class="flip-row" id="round2TopRow">
+          <div class="flip-slot" data-slot="0"></div>
+          <div class="flip-slot" data-slot="1"></div>
+          <div class="flip-slot" data-slot="2"></div>
+          <div class="flip-slot" data-slot="3"></div>
         </div>
 
-        <div class="card-wrap pos2" data-price="2.79">
-          <button class="tick" type="button">✓</button>
-          <div class="card">
-            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
-            <div class="card-face front"><img src="cards/atlasflyspray-card.png" alt="Atlas Fly Spray"></div>
+        <div class="deck-zone">
+          <div class="deck-stack" id="round2Deck">
+            <div class="deck-shadow-3"></div>
+            <div class="deck-shadow-2"></div>
+            <div class="deck-shadow"></div>
+            <div class="deck-top">
+              <img src="facecard.jpeg" alt="Super21 face card">
+            </div>
           </div>
-          <div class="price-badge">$2.79</div>
         </div>
 
-        <div class="card-wrap pos3" data-price="4.69">
-          <button class="tick" type="button">✓</button>
-          <div class="card">
-            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
-            <div class="card-face front"><img src="cards/begamacandcheese-card.png" alt="Bega Mac and Cheese"></div>
-          </div>
-          <div class="price-badge">$4.69</div>
-        </div>
-
-        <div class="card-wrap pos4" data-price="5.99">
-          <button class="tick" type="button">✓</button>
-          <div class="card">
-            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
-            <div class="card-face front"><img src="cards/pizzasnacks-card.png" alt="Pizza Snacks"></div>
-          </div>
-          <div class="price-badge">$5.99</div>
-        </div>
-
-        <div class="card-wrap pos5" data-price="9.89">
-          <button class="tick" type="button">✓</button>
-          <div class="card">
-            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
-            <div class="card-face front"><img src="cards/quilton-card.png" alt="Quilton Toilet Paper"></div>
-          </div>
-          <div class="price-badge">$9.89</div>
-        </div>
-
-        <div class="card-wrap pos6" data-price="3.49">
-          <button class="tick" type="button">✓</button>
-          <div class="card">
-            <div class="card-face back"><img src="facecard.jpeg" alt="ShopJack card back"></div>
-            <div class="card-face front"><img src="cards/briochebuns-card.png" alt="Bon Appetit Brioche Burger Buns"></div>
-          </div>
-          <div class="price-badge">$3.49</div>
+        <div class="flip-row" id="round2BottomRow">
+          <div class="flip-slot" data-slot="4"></div>
+          <div class="flip-slot" data-slot="5"></div>
+          <div class="flip-slot" data-slot="6"></div>
+          <div class="flip-slot" data-slot="7"></div>
         </div>
       </section>
 
       <div class="controls">
-        <button class="btn btn-secondary" id="flipBtn2" type="button">Flip cards</button>
+        <button class="btn btn-secondary" id="flipBtn2" type="button">Flip</button>
         <button class="btn btn-primary" id="lockBtn2" type="button">Locknload</button>
       </div>
     </section>
 
     <section class="scoreboard" aria-live="polite">
-      <div class="line1" id="statusText">Flip the cards, tick your picks, then Locknload.</div>
+      <div class="line1" id="statusText">Press Flip to reveal products one by one, then Locknload.</div>
       <div class="line2" id="totalText">Round 1 total: $0.00</div>
       <div class="line3" id="scoreText">Round 1 score: 0 points</div>
-      <div class="line4" id="hintText">Over the target by even 1 cent is a BUST.</div>
+      <div class="line4" id="hintText">Go over the target by even 1 cent and you BUST.</div>
     </section>
 
     <button class="btn-saloon" id="saloonBtn" type="button">
@@ -667,10 +643,35 @@
   </div>
 
   <script>
-    const target = 21;
+    const target = 31;
     const gameNumber = 213;
     const gameDate = '5th May 2026';
-    const shareUrl = 'https://shopjack.onrender.com';
+    const shareUrl = 'https://github.com/RodeH1969/super21';
+    const maxFlips = 8;
+
+    const round1Cards = [
+      // Big items are intentionally weighted early to throw the player,
+      { image: 'cards/cadbury-card.png', alt: 'Cadbury card', price: 4.00 },
+      { image: 'cards/emporiumgoats-card.png', alt: "Emporium goat cheese card", price: 8.99 },
+      { image: 'cards/halloumi-card.png', alt: 'Halloumi card', price: 4.99 },
+      { image: 'cards/cocopops-card.png', alt: 'Coco Pops card', price: 7.20 },
+      { image: 'cards/nutrigrain-card.png', alt: 'Nutri-Grain card', price: 4.50 },
+      { image: 'cards/morningfresh-card.png', alt: 'Morning Fresh Lemon card', price: 10.00 },
+      { image: 'cards/smiths-card.png', alt: 'Smiths chips card', price: 2.50 },
+      { image: 'cards/atlasflyspray-card.png', alt: 'Atlas Fly Spray card', price: 2.79 }
+    ];
+
+    const round2Cards = [
+      // Round 2 also opens with chunkier prices to create pressure,
+      { image: 'cards/begamacandcheese-card.png', alt: 'Bega Mac and Cheese card', price: 4.69 },
+      { image: 'cards/pizzasnacks-card.png', alt: 'Pizza Snacks card', price: 5.99 },
+      { image: 'cards/quilton-card.png', alt: 'Quilton card', price: 9.89 },
+      { image: 'cards/briochebuns-card.png', alt: 'Brioche Buns card', price: 3.49 },
+      { image: 'cards/cadbury-card.png', alt: 'Cadbury card', price: 4.00 },
+      { image: 'cards/halloumi-card.png', alt: 'Halloumi card', price: 4.99 },
+      { image: 'cards/cocopops-card.png', alt: 'Coco Pops card', price: 7.20 },
+      { image: 'cards/nutrigrain-card.png', alt: 'Nutri-Grain card', price: 4.50 }
+    ];
 
     const bustOverlay = document.getElementById('bustOverlay');
     const statusText = document.getElementById('statusText');
@@ -684,6 +685,9 @@
     const shareBtn = document.getElementById('shareBtn');
     const round1Panel = document.getElementById('round1Panel');
     const round2Panel = document.getElementById('round2Panel');
+    const targetChip = document.getElementById('targetChip');
+
+    targetChip.textContent = `$${target}`;
 
     let round1Result = null;
     let round2Result = null;
@@ -715,73 +719,97 @@
       bustOverlay.classList.add('show');
     }
 
+    function shuffleArray(arr) {
+      const clone = [...arr];
+      for (let i = clone.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [clone[i], clone[j]] = [clone[j], clone[i]];
+      }
+      return clone;
+    }
+
+    function makeCardMarkup(cardData) {
+      const wrap = document.createElement('div');
+      wrap.className = 'card-wrap price-hidden';
+
+      wrap.innerHTML = `
+        <div class="card">
+          <div class="card-face back">
+            <img src="facecard.jpeg" alt="Super21 card back">
+          </div>
+          <div class="card-face front">
+            <img src="${cardData.image}" alt="${cardData.alt}">
+          </div>
+          <div class="price-badge">$${cardData.price.toFixed(2)}</div>
+        </div>
+      `;
+
+      return wrap;
+    }
+
     function setupRound(options) {
       const {
         panelId,
         flipBtnId,
         lockBtnId,
+        cardsData,
+        roundName,
         onFinish
       } = options;
 
       const panel = document.getElementById(panelId);
-      const cards = [...panel.querySelectorAll('.card-wrap')];
       const flipBtn = document.getElementById(flipBtnId);
       const lockBtn = document.getElementById(lockBtnId);
+      const slots = [...panel.querySelectorAll('.flip-slot')];
 
-      let facesVisible = false;
-      let scored = false;
-
-      cards.forEach(card => {
-        const tick = card.querySelector('.tick');
-        tick.addEventListener('click', () => {
-          if (!facesVisible || scored) return;
-          card.classList.toggle('chosen');
-        });
-      });
+      const deckCards = shuffleArray(cardsData);
+      const flippedCards = [];
+      let locked = false;
 
       flipBtn.addEventListener('click', () => {
-        if (scored || facesVisible) return;
-        facesVisible = true;
-        cards.forEach(card => card.classList.add('show-face'));
-        flipBtn.style.display = 'none';
-        statusText.textContent = 'Now tick the cards you want to keep in.';
+        if (locked) return;
+        if (flippedCards.length >= maxFlips) return;
+
+        const nextCard = deckCards[flippedCards.length];
+        if (!nextCard) return;
+
+        const slot = slots[flippedCards.length];
+        slot.classList.add('filled');
+
+        const cardEl = makeCardMarkup(nextCard);
+        slot.appendChild(cardEl);
+
+        flippedCards.push(nextCard);
+
+        statusText.textContent = `${roundName}: ${flippedCards.length} card${flippedCards.length === 1 ? '' : 's'} flipped.`;
+        totalText.textContent = `${roundName} total: $0.00`;
+        scoreText.textContent = `${roundName} score: waiting for Locknload`;
+        hintText.textContent = flippedCards.length < maxFlips
+          ? 'Flip again or Locknload now.'
+          : 'That is all 8 cards. Time to Locknload.';
+
+        if (flippedCards.length >= maxFlips) {
+          flipBtn.disabled = true;
+        }
       });
 
       lockBtn.addEventListener('click', () => {
-        if (scored || !facesVisible) return;
-        scored = true;
-        lockBtn.style.display = 'none';
+        if (locked || flippedCards.length === 0) return;
 
-        cards.forEach(card => {
-          card.classList.add('show-face', 'price-on', 'scored');
-          if (card.classList.contains('chosen')) {
-            card.classList.add('locked');
-          }
+        locked = true;
+        lockBtn.disabled = true;
+        flipBtn.disabled = true;
+
+        const cardEls = panel.querySelectorAll('.card-wrap');
+        cardEls.forEach(cardEl => {
+          cardEl.classList.remove('price-hidden');
+          cardEl.classList.add('price-revealed');
         });
 
-        let total = 0;
-        let selectedCount = 0;
-
-        cards.forEach(card => {
-          if (card.classList.contains('chosen')) {
-            total += Number(card.dataset.price);
-            selectedCount += 1;
-          }
-        });
-
+        let total = flippedCards.reduce((sum, card) => sum + card.price, 0);
         total = +total.toFixed(2);
-        const result = scoreFor(total);
 
-        if (selectedCount === 0) {
-          onFinish({
-            total,
-            selectedCount,
-            score: 0,
-            label: 'No cards picked',
-            bust: false
-          });
-          return;
-        }
+        const result = scoreFor(total);
 
         if (total > target) {
           triggerBust();
@@ -789,7 +817,7 @@
 
         onFinish({
           total,
-          selectedCount,
+          flippedCount: flippedCards.length,
           score: result.score,
           label: result.label,
           bust: total > target
@@ -801,17 +829,17 @@
       panelId: 'round1Panel',
       flipBtnId: 'flipBtn1',
       lockBtnId: 'lockBtn1',
+      cardsData: round1Cards,
+      roundName: 'Round 1',
       onFinish: (result) => {
         round1Result = result;
         totalText.textContent = `Round 1 total: $${result.total.toFixed(2)}`;
         scoreText.textContent = `Round 1 score: ${result.score} points`;
 
-        if (result.selectedCount === 0) {
-          statusText.textContent = 'Round 1: no cards ticked.';
-        } else if (result.bust) {
+        if (result.bust) {
           statusText.textContent = `Round 1 BUST! You went over $${target}.`;
         } else {
-          statusText.textContent = `Round 1: ${result.label} with ${result.selectedCount} locked card${result.selectedCount === 1 ? '' : 's'}.`;
+          statusText.textContent = `Round 1: ${result.label} from ${result.flippedCount} flipped card${result.flippedCount === 1 ? '' : 's'}.`;
         }
 
         hintText.textContent = 'Now head to Last Chance Saloon for Round 2.';
@@ -823,6 +851,8 @@
       panelId: 'round2Panel',
       flipBtnId: 'flipBtn2',
       lockBtnId: 'lockBtn2',
+      cardsData: round2Cards,
+      roundName: 'Round 2',
       onFinish: (result) => {
         round2Result = result;
 
@@ -832,12 +862,10 @@
         totalText.textContent = `Round 2 total: $${result.total.toFixed(2)}`;
         scoreText.textContent = `Round 2 score: ${result.score} points`;
 
-        if (result.selectedCount === 0) {
-          statusText.textContent = 'Round 2: no cards ticked.';
-        } else if (result.bust) {
+        if (result.bust) {
           statusText.textContent = `Round 2 BUST! You went over $${target}.`;
         } else {
-          statusText.textContent = `Round 2: ${result.label} with ${result.selectedCount} locked card${result.selectedCount === 1 ? '' : 's'}.`;
+          statusText.textContent = `Round 2: ${result.label} from ${result.flippedCount} flipped card${result.flippedCount === 1 ? '' : 's'}.`;
         }
 
         hintText.textContent = 'Final result ready to share.';
@@ -852,10 +880,10 @@
       saloonBtn.style.display = 'none';
       round1Panel.classList.remove('active');
       round2Panel.classList.add('active');
-      statusText.textContent = 'Welcome to Last Chance Saloon. Flip the new cards.';
+      statusText.textContent = 'Welcome to Last Chance Saloon. Press Flip to start Round 2.';
       totalText.textContent = `Round 1 total: $${(round1Result?.total || 0).toFixed(2)}`;
       scoreText.textContent = `Round 1 score: ${round1Result?.score || 0} points`;
-      hintText.textContent = 'Round 2 uses a different 6-card set.';
+      hintText.textContent = 'Round 2 uses a fresh 8-card run.';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
@@ -865,7 +893,7 @@
       const emoji = resultEmoji(combinedPoints);
 
       return [
-        `Shop21 Game #${gameNumber}`,
+        `Super21 Game #${gameNumber}`,
         `${gameDate}`,
         `Target each round: $${target}`,
         `Round 1: $${(round1Result?.total || 0).toFixed(2)} / ${round1Result?.score || 0} pts`,
@@ -882,7 +910,7 @@
       if (navigator.share) {
         try {
           await navigator.share({
-            title: `$hop21 Game #${gameNumber}`,
+            title: `Super21 Game #${gameNumber}`,
             text,
             url: shareUrl
           });
